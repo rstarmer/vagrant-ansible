@@ -1,0 +1,22 @@
+---
+- hosts: default
+  vars:
+    text: "This is a web server"
+  remote_user: vagrant
+  sudo: yes
+  tasks:
+  - name: updates a server
+    apt: update_cache=yes
+  - name: upgrade a server
+    apt: upgrade=full
+  - name: ensure apache is installed
+    apt: pkg=apache2 state=latest
+  - name: update index.html
+    template: src=index.j2 dest=/var/www/html/index.html
+    notify:
+    - restart apache
+  - name: ensure apache is running
+    service: name=apache2 state=started
+  handlers:
+    - name: restart apache
+      service: name=apache2 state=restarted

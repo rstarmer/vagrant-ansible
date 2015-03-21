@@ -1,0 +1,23 @@
+---
+- hosts: default
+  name: install devstack
+  remote_user: vagrant
+  tasks:
+    - name: updates a server
+      apt: update_cache=yes
+      sudo: yes
+    # - name: upgrade a server
+    #   apt: upgrade=dist
+    #   sudo: yes
+    - name: ensure git is installed
+      apt: pkg=git state=latest
+      sudo: yes
+    - name: clone devstack
+      git: repo=https://github.com/openstack-dev/devstack.git
+        dest=/home/vagrant/devstack
+    - name: grab local.conf file from gist
+      command: wget -O /home/vagrant/devstack/local.conf https://gist.githubusercontent.com/rstarmer/29b54c26b32387b392f2/raw/b10877e6610c1347d832fb147345cac918abada4/local.conf
+    - name: run stack.sh
+      shell: (cd /home/vagrant/devstack; ./stack.sh)
+
+
