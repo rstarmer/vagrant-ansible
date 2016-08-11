@@ -1,5 +1,5 @@
 ---
-- hosts: build
+- hosts: default
   gather_facts: false
   become: true
   become_user: root
@@ -7,7 +7,7 @@
   - raw: apt-get install python -y
     ignore_errors: true
 
-- hosts: build
+- hosts: default
   become: true
   become_user: root
   vars:
