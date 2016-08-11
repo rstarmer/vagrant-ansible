@@ -14,6 +14,9 @@
     net_0: 10.10.10.0/24
     vld: /var/lib/docker
     domain: opsits.com
+    index: 1
+    pub_int: enp0s8
+    ext_int: enp0s9
   pre_tasks:
   - name: install system specific packages
     include: debian.yml
@@ -43,14 +46,30 @@
   - name: create veth interface
     command: ip link add veth0 type veth peer name veth1
     when: not (veth_info.stdout | search('veth0'))
-  - name: add ip addr to vxlan0
-    command: "ip addr add {{net_0|ipaddr('net')|ipaddr(index)}} dev vxlan1"
+  - name: add br0
+    command: brctl addbr br0
+    when: not (veth_info.stdout | search('veth0'))
+  - name: add ext_int to br0
+    command: brctl addif br0 {{ext_int}}
+    when: not (veth_info.stdout | search('veth0'))
+  - name: add veth1 to br0
+    command: brctl addif br0 veth1
+    when: not (veth_info.stdout | search('veth0'))
+  - name: re-discover address on br0
+#    command: "ip addr add {{net_0|ipaddr('net')|ipaddr(index)}} dev vxlan1"
+    command: dhclient br0
     when: not (veth_info.stdout | search('veth0'))
   - name: bring up links
     command: ip link set "{{item}}" up
     with_items:
        - veth0
        - veth1
+       - br0
+  - name: re-discover address on br0
+#    command: "ip addr add {{net_0|ipaddr('net')|ipaddr(index)}} dev vxlan1"
+    command: dhclient br0
+    when: not (veth_info.stdout | search('veth0'))
+
 
 
   - name: Install ansible version 2.0 or greater
@@ -71,7 +90,7 @@
   - name: create systemd docker service directory
     file: dest=/etc/systemd/system/docker.service.d state=directory
   - name: create docker service conf file
-    copy: src=files/kolla.conf dest=/etc/systemd/system/docker.service.d/kolla.conf
+    copy: src=./kolla.conf dest=/etc/systemd/system/docker.service.d/kolla.conf
   - name: restart daemons
     command: systemctl daemon-reload
   - name: restart docker service
@@ -86,11 +105,11 @@
       net_0_ip: "{{ net_0 |ipaddr('net')|ipaddr(index)}}"
       vip_net: "{{ansible_default_ipv4.network}}/{{ansible_default_ipv4.netmask}}"
   - set_fact:
-      vip_ip:  "{{net_mask|ipaddr('net')|ipaddr('-1')}}"
+      vip_ip:  "{{vip_net|ipaddr('net')|ipaddr('-2')}}"
   - name: set the default internal VIP address
     lineinfile: "dest=/etc/kolla/globals.yml regexp=^kolla_internal_vip_address.* line='kolla_internal_vip_address: {{vip_ip}}'"
   - name: set the docker network interface
-    lineinfile: "dest=/etc/kolla/globals.yml regexp=^.*network_interface:.* line='network_interface: eth1'"
+    lineinfile: "dest=/etc/kolla/globals.yml regexp=^.*network_interface:.* line='network_interface: br0'"
   - name: set the docker network interface
     lineinfile: "dest=/etc/kolla/globals.yml regexp=^.*neutron_external_interface:.* line='neutron_external_interface: veth0'"
   - name: set the docker network interface
@@ -106,7 +125,7 @@
     poll: 0
     register: kolla_build
     ignore_errors: true
-
+  - debug: msg="Run this: kolla-build --type source --base ubuntu"
 ## Ensure DNS is configured
   - name: update resolv.conf with domain
     lineinfile: dest=/etc/resolv.conf backrefs=yes regexp=^search(.*) line='search \1 {{domain}}'
