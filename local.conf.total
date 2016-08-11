@@ -1,0 +1,27 @@
+[[local|localrc]]
+# Uncomment the next line after you've run devstack once if you don't want to try to download everything again.
+#OFFLINE=true
+
+# Set default passwords, further accelerate deployment, maybe make this less generic if you're in an environment where someone may 'play' with your system
+ADMIN_PASSWORD=ubuntu
+DATABASE_PASSWORD=ubuntu
+RABBIT_PASSWORD=ubuntu
+SERVICE_PASSWORD=ubuntu
+SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5c2000f5
+SWIFT_REPLICAS=1
+SWIFT_DATA_DIR=$DEST/data
+
+# This is the token used to set up Keystone - It just needs to be a long generic string
+SERVICE_TOKEN=a682f596-76f3-11e3-b3b2-e716f9080d50
+disable_service n-net
+enable_service q-svc
+enable_service q-agt
+enable_service q-dhcp
+enable_service q-l3
+enable_service q-meta
+enable_service q-metering
+enable_service q-lbaas
+enable_service s-proxy s-object s-container s-account
+enable_service heat h-api h-api-cfn h-api-cw h-eng
+enale_service q-lbaasv2
+enable_service octavia o-cw o-hk o-hm o-api

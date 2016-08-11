@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/xenial64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -20,17 +20,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network "forwarded_port", guest: 80, host: 8080
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
-  config.vm.network "private_network", ip: "10.1.64.11"
+  config.vm.network "private_network", ip: "192.168.33.10"
+  # config.vm.network "private_network", ip: "10.1.64.11"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
-  # config.vm.network "public_network"
+  config.vm.network "public_network"
 
   # If true, then any SSH connections made will enable agent forwarding.
   # Default value: false
@@ -50,7 +50,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Don't boot with headless mode
     # vb.gui = false
     # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", "6192"]
+    vb.memory = 8192
+    vb.cpus = 4
   end
   #
   # View the documentation for the provider you're using for more
@@ -67,6 +68,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # end
 
   config.vm.provision :ansible do |ab|
-    ab.playbook = "devstack.yml"
+    ab.playbook = "kolla.yml"
   end
 end
