@@ -55,19 +55,19 @@
   - name: add veth1 to br0
     command: brctl addif br0 veth1
     when: not (veth_info.stdout | search('veth0'))
-  - name: re-discover address on br0
-#    command: "ip addr add {{net_0|ipaddr('net')|ipaddr(index)}} dev vxlan1"
-    command: dhclient br0
-    when: not (veth_info.stdout | search('veth0'))
   - name: bring up links
     command: ip link set "{{item}}" up
     with_items:
+       - enp8s0
+       - enp9s0
        - veth0
        - veth1
        - br0
-  - name: re-discover address on br0
-#    command: "ip addr add {{net_0|ipaddr('net')|ipaddr(index)}} dev vxlan1"
-    command: dhclient br0
+  - name: re-discover address on interfaces
+    command: dhclient {{item}}
+    with_items:
+      - br0
+      - enp8s0
     when: not (veth_info.stdout | search('veth0'))
 
 
