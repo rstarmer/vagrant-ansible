@@ -1,2 +1,2 @@
 [build]
-default
+default ansible_ssh_address=172.17.8.10 ansible_ssh_user=root
