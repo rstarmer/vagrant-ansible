@@ -118,9 +118,10 @@
 
 ## Build the images
   - name: run kolla build to build source based images
-    shell: kolla-build --type source --base ubuntu \|& tee /var/log/kolla-build.log
+    shell: 'kolla-build --type source --base ubuntu |& /var/log/kolla-build.log'
     args:
       creates: /var/log/kolla-build.log
+      executable: /bin/bash
     async: 60
     poll: 0
     register: kolla_build
