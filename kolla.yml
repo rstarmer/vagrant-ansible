@@ -47,28 +47,28 @@
   - name: create veth interface
     command: ip link add veth0 type veth peer name veth1
     when: not (veth_info.stdout | search('veth0'))
-  - name: add {{br_int}}
-    command: brctl addbr {{br_int}}
+  - name: add '{{br_int}}'
+    command: brctl addbr '{{br_int}}'
     when: not (veth_info.stdout | search('veth0'))
-  - name: add ext_int to {{br_int}}
-    command: brctl addif {{br_int}} {{ext_int}}
+  - name: add ext_int to '{{br_int}}'
+    command: brctl addif '{{br_int}}' '{{ext_int}}'
     when: not (veth_info.stdout | search('veth0'))
-  - name: add veth1 to {{br_int}}
-    command: brctl addif {{br_int}} veth1
+  - name: add veth1 to '{{br_int}}'
+    command: brctl addif '{{br_int}}' veth1
     when: not (veth_info.stdout | search('veth0'))
   - name: bring up links
     command: ip link set "{{item}}" up
     with_items:
-       - enp8s0
-       - enp9s0
+       - "{{pub_int}}"
+       - "{{ext_int}}"
        - veth0
        - veth1
-       - {{br_int}}
+       - "{{br_int}}"
   - name: re-discover address on interfaces
-    command: dhclient {{item}}
+    command: dhclient "{{item}}"
     with_items:
-      - {{br_int}}
-      - {{pub_int}}
+      - "{{br_int}}"
+      - "{{pub_int}}"
     when: not (veth_info.stdout | search('veth0'))
 
 
@@ -147,5 +147,7 @@
     retries: 600
   - name: generate passwords
     command: kolla-genpwd creates=/etc/kolla/passwords.yml
-  - name: update  keystone_admin_password
-    lineinfile: src=/etc/kolla/passwords.yml regexp='^keystone_admin_password:.*' line='keystone_admin_password: openstack' 
+  - name: update keystone_admin_password
+    lineinfile: >
+     src=/etc/kolla/passwords.yml 
+     line='keystone_admin_password: openstack' 
