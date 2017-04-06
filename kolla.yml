@@ -6,6 +6,19 @@
   tasks:
   - raw: apt-get install python -y
     ignore_errors: true
+    when: ansible_os_family == "Debian"
+
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: find local ssh keys
+    find: path='./' patterns='id_rsa.*'
+    register: ssh_found
+  - name: create ssh key
+    command: ssh-keygen -t rsa -N '' -f id_rsa
+    delegate_to: localhost
+    ignore_errors: yes
+    when: ssh_found.matched == 0
 
 - hosts: build
   become: true
